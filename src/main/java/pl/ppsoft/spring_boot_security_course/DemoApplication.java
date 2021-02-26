@@ -1,4 +1,4 @@
-package com.example.demo;
+package pl.ppsoft.spring_boot_security_course;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

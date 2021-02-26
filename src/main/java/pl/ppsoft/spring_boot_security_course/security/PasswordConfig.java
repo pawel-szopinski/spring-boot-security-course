@@ -1,4 +1,4 @@
-package com.example.demo.security;
+package pl.ppsoft.spring_boot_security_course.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

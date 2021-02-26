@@ -1,7 +1,8 @@
-package com.example.demo.security;
+package pl.ppsoft.spring_boot_security_course.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -10,10 +11,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-import static com.example.demo.security.ApplicationUserRole.*;
-
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
@@ -25,9 +25,11 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
-                .antMatchers("/api/**").hasRole(ADMIN.name())
+                .antMatchers("/", "/*.html", "/css/*", "/js/*").permitAll()
+                .antMatchers("/api/*/students/**").hasAnyRole(
+                ApplicationUserRole.ADMIN.name(), ApplicationUserRole.STUDENT.name())
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();
@@ -36,27 +38,27 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     @Bean
     protected UserDetailsService userDetailsService() {
-        var user = User.builder()
+        var student = User.builder()
                 .username("student")
                 .password("pass")
-                .roles(STUDENT.name())
                 .passwordEncoder(passwordEncoder::encode)
+                .authorities(ApplicationUserRole.STUDENT.getGrantedAuthorities())
                 .build();
 
         var admin = User.builder()
                 .username("admin")
                 .password("pass")
-                .roles(ADMIN.name())
                 .passwordEncoder(passwordEncoder::encode)
+                .authorities(ApplicationUserRole.ADMIN.getGrantedAuthorities())
                 .build();
 
-        var adminTrainee = User.builder()
-                .username("admin_trainee")
+        var trainee = User.builder()
+                .username("trainee")
                 .password("pass")
-                .roles(ADMIN_TRAINEE.name())
                 .passwordEncoder(passwordEncoder::encode)
+                .authorities(ApplicationUserRole.TRAINEE.getGrantedAuthorities())
                 .build();
 
-        return new InMemoryUserDetailsManager(admin, adminTrainee, user);
+        return new InMemoryUserDetailsManager(admin, trainee, student);
     }
 }
