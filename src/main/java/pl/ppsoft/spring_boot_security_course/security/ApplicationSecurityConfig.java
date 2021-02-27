@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static pl.ppsoft.spring_boot_security_course.security.ApplicationUserRole.*;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -25,11 +27,12 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+//                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+//                .and()
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/", "/*.html", "/css/*", "/js/*").permitAll()
-                .antMatchers("/api/*/students/**").hasAnyRole(
-                ApplicationUserRole.ADMIN.name(), ApplicationUserRole.STUDENT.name())
+                .antMatchers("/api/*/students/**").hasAnyRole(ADMIN.name(), STUDENT.name())
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();
@@ -42,21 +45,21 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .username("student")
                 .password("pass")
                 .passwordEncoder(passwordEncoder::encode)
-                .authorities(ApplicationUserRole.STUDENT.getGrantedAuthorities())
+                .authorities(STUDENT.getGrantedAuthorities())
                 .build();
 
         var admin = User.builder()
                 .username("admin")
                 .password("pass")
                 .passwordEncoder(passwordEncoder::encode)
-                .authorities(ApplicationUserRole.ADMIN.getGrantedAuthorities())
+                .authorities(ADMIN.getGrantedAuthorities())
                 .build();
 
         var trainee = User.builder()
                 .username("trainee")
                 .password("pass")
                 .passwordEncoder(passwordEncoder::encode)
-                .authorities(ApplicationUserRole.TRAINEE.getGrantedAuthorities())
+                .authorities(TRAINEE.getGrantedAuthorities())
                 .build();
 
         return new InMemoryUserDetailsManager(admin, trainee, student);
